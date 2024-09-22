@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Build and Push image to Aliyun
         run: |
+          git submodule update --init --recursive
           IMAGE_TAG="$ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$IMAGE_NAME:latest"
           docker build . --file Dockerfile --tag $IMAGE_TAG
           docker login -u $ALIYUN_REGISTRY_USERNAME -p $ALIYUN_REGISTRY_PASSWORD $ALIYUN_REGISTRY
