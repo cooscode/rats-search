@@ -9,6 +9,7 @@ on:
   schedule:
     - cron:  '0 7 * * 1'
     # scheduled at 07:00 every Monday and Thursday
+  workflow_dispatch:
 
 jobs:
   sync_latest_from_upstream:
@@ -17,45 +18,33 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Clean issue notice
-      uses: actions-cool/issues-helper@v3
-      with:
-        actions: 'close-issues'
-        labels: '🚨 Sync Fail'
+      - uses: actions/checkout@v4
+      - name: Clean issue notice
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: '🚨 Sync Fail'
 
-    # REQUIRED step
-    # Step 2: run the sync action
-    - name: Sync upstream changes
-      id: sync
-      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
-      with:
+      # REQUIRED step
+      # Step 2: run the sync action
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
           upstream_sync_repo: qier222/YesPlayMusic
           upstream_sync_branch: master
           target_sync_branch: master
           target_repo_token: ${{ secrets.GITHUB_TOKEN }} # automatically generated, no need to set
           test_mode: false
-      
-    # Step 3: Display a sample message based on the sync output var 'has_new_commits'
-    - name: New commits found
-      if: steps.sync.outputs.has_new_commits == 'true'
-      run: echo "New commits were found to sync."
-    
-    - name: No new commits
-      if: steps.sync.outputs.has_new_commits == 'false'
-      run: echo "There were no new commits."
-      
-    - name: Show value of 'has_new_commits'
-      run: echo ${{ steps.sync.outputs.has_new_commits }}
 
-    - name: Sync check
-      if: failure()
-      uses: actions-cool/issues-helper@v3
-      with:
-        actions: 'create-issue'
-        title: '🚨 同步失败 | Sync Fail'
-        labels: '🚨 Sync Fail'
-        body: |
-          Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork.
+      - name: Sync check
+        if: failure()
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-issue'
+          title: '🚨 同步失败 | Sync Fail'
+          labels: '🚨 Sync Fail'
+          body: |
+            Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork.
 
-          由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次。
+            由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次。
