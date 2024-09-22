@@ -1,0 +1,31 @@
+name: Create and Push Docker Image
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+
+env:
+  ALIYUN_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
+  ALIYUN_NAME_SPACE: "${{ secrets.ALIYUN_NAME_SPACE }}"
+  ALIYUN_REGISTRY_USERNAME: "${{ secrets.ALIYUN_REGISTRY_USERNAME }}"
+  ALIYUN_REGISTRY_PASSWORD: "${{ secrets.ALIYUN_REGISTRY_PASSWORD }}"
+  IMAGE_NAME: "rats-search"
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v3.3.0
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Build and Push image to Aliyun
+        run: |
+          IMAGE_TAG="$ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$IMAGE_NAME:latest"
+          docker build . --file Dockerfile --tag $IMAGE_TAG
+          docker login -u $ALIYUN_REGISTRY_USERNAME -p $ALIYUN_REGISTRY_PASSWORD $ALIYUN_REGISTRY
+          docker push $IMAGE_TAG
+          
+          
