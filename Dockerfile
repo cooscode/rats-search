@@ -1,10 +1,9 @@
 FROM node:20
 ARG DEBIAN_FRONTEND=noninteractive
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-WORKDIR /home/node/app
-COPY --chown=node:node . .
+RUN mkdir -p /app/node_modules
+WORKDIR /app
+COPY . .
 RUN npm install -g npm
-USER node
 
 RUN npm install --force
 RUN ls -la
